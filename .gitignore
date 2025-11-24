@@ -151,3 +151,6 @@ cython_debug/
 
 # VS Code
 .vscode/
+
+# Internal tests
+test_chaos_middleware.py
