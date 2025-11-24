@@ -1,0 +1,14 @@
+[project]
+name = "langchain-chaos-middleware"
+version = "0.1.0"
+description = "Chaos testing middleware for LangChain agents"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "langchain>=1.0.0",
+    "langgraph>=1.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
