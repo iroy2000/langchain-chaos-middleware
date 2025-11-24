@@ -83,6 +83,19 @@ config = {
 }
 ```
 
+## Understanding Failure Rates
+
+The `failure_rate` applies to **each individual tool call**, not to the entire agent task. If your agent needs to call multiple tools to complete a task, the overall success rate will be lower than you might expect.
+
+**Example**: With a 20% failure rate per tool:
+- **Single tool call**: 80% chance of success
+- **Two tool calls**: 80% × 80% = **64% chance of success**
+- **Three tool calls**: 80% × 80% × 80% = **51% chance of success**
+
+This means that even with a "low" 20% failure rate, an agent that needs to call 3 tools has nearly a 50% chance of experiencing at least one failure during the task.
+
+**Tip**: Start with a low failure rate (e.g., 10-20%) and observe how it affects your agent's overall success rate before increasing it.
+
 ## Safety
 
 To prevent accidental chaos in production, the middleware checks for an environment variable (default: `ENABLE_CHAOS`). If this variable is not set to `"true"`, the middleware acts as a pass-through and does nothing.
