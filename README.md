@@ -97,6 +97,6 @@ This means that even with a "low" 20% failure rate, an agent that needs to call 
 
 **Tip**: Start with a low failure rate (e.g., 10-20%) and observe how it affects your agent's overall success rate before increasing it.
 
-## Safety
+## Important Note for Production
 
 To prevent accidental chaos in production, the middleware checks for an environment variable (default: `ENABLE_CHAOS`). If this variable is not set to `"true"`, the middleware acts as a pass-through and does nothing.
