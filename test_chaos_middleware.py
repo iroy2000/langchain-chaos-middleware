@@ -10,7 +10,6 @@ to inject failures and test agent resilience.
 """
 from dotenv import load_dotenv
 from langchain.agents import create_agent
-from langchain_openai import ChatOpenAI
 from langchain.tools import tool
 
 # Import chaos middleware
@@ -57,6 +56,7 @@ def test_without_chaos():
     try:
         response = agent.invoke({"messages": [{"role": "user", "content": test_query}]})
         print(f"\nSuccess! Response received")
+        print(f"Agent Response: {response}")
     except Exception as e:
         print(f"\nError: {e}")
 
@@ -74,7 +74,7 @@ def test_with_chaos():
     # Configure chaos to inject failures
     # ChaosConfig expects: failure_rate, exception_types, include_tools, exclude_tools, seed, safety_key
     chaos_config: ChaosConfig = {
-        "failure_rate": 0.1,  # 10% chance of tool failure (lower rate = higher success)
+        "failure_rate": 0.1,  # 10% chance of tool failure
         "exception_types": [],  # Use default exceptions
         "include_tools": None,  # Target all tools
         "exclude_tools": [],  # Don't exclude any tools
@@ -109,6 +109,7 @@ def test_with_chaos():
         try:
             response = agent.invoke({"messages": [{"role": "user", "content": test_query}]})
             print(f"    Success")
+            print(f"    Response: {response}")
             successes += 1
         except Exception as e:
             print(f"    Failed: {type(e).__name__}")
