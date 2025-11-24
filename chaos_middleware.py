@@ -1,19 +1,32 @@
 import os
 import random
-from typing import List, Optional, Any, Dict, Type
+from typing import List, Optional, Any, Type, Callable
 try:
     from typing import TypedDict
 except ImportError:
     from typing_extensions import TypedDict
 
-# Assuming these imports based on the spec and typical LangChain structure.
-# If AgentMiddleware is not available, we might need to adjust or just implement the protocol.
+# Import LangChain v1 middleware types
 try:
-    from langchain.agents.middleware import AgentMiddleware
+    from langchain.agents.middleware import (
+        AgentMiddleware,
+        ModelRequest,
+        ModelResponse,
+    )
+    # ToolCallRequest might be in a different location or named differently
+    # We'll handle this gracefully
+    try:
+        from langchain.agents.middleware import ToolCallRequest
+    except ImportError:
+        # If ToolCallRequest doesn't exist, we'll use the request object directly
+        ToolCallRequest = Any
 except ImportError:
-    # Fallback or placeholder if the specific class isn't found in this environment yet
+    # Fallback for development/testing without LangChain installed
     class AgentMiddleware:
         pass
+    ModelRequest = Any
+    ModelResponse = Any
+    ToolCallRequest = Any
 
 class ChaosConfig(TypedDict):
     """Configuration for the Chaos Monkey Middleware.
@@ -55,11 +68,15 @@ class ChaosMiddleware(AgentMiddleware):
         if self.seed is not None:
             random.seed(self.seed)
 
-    def wrap_tool_call(self, tool_call: Dict[str, Any], handler: Any) -> Any:
+    def wrap_tool_call(
+        self, 
+        request: ToolCallRequest, 
+        handler: Callable[[ToolCallRequest], Any]
+    ) -> Any:
         """Intercepts tool calls and potentially raises an exception.
         
         Args:
-            tool_call: The tool call dictionary containing 'name' and 'args'.
+            request: The ToolCallRequest object containing tool information.
             handler: The next handler in the chain.
             
         Returns:
@@ -70,16 +87,20 @@ class ChaosMiddleware(AgentMiddleware):
         """
         # Safety Check
         if os.environ.get(self.safety_key, "").lower() != "true":
-            return handler(tool_call)
+            return handler(request)
 
-        tool_name = tool_call.get("name")
+        # Extract tool name from request
+        # The request object should have a 'tool' attribute with the BaseTool instance
+        tool_name = getattr(request, 'tool', None)
+        if tool_name is not None:
+            tool_name = getattr(tool_name, 'name', str(tool_name))
         
         # Target Check
-        if tool_name in self.exclude_tools:
-            return handler(tool_call)
+        if tool_name and tool_name in self.exclude_tools:
+            return handler(request)
         
-        if self.include_tools is not None and tool_name not in self.include_tools:
-            return handler(tool_call)
+        if self.include_tools is not None and (not tool_name or tool_name not in self.include_tools):
+            return handler(request)
 
         # Roll Dice
         if random.random() <= self.failure_rate:
@@ -89,24 +110,28 @@ class ChaosMiddleware(AgentMiddleware):
             else:
                 raise Exception("Chaos Monkey triggered!")
 
-        return handler(tool_call)
+        return handler(request)
 
-    def wrap_model_call(self, model_call: Dict[str, Any], handler: Any) -> Any:
+    def wrap_model_call(
+        self, 
+        request: ModelRequest, 
+        handler: Callable[[ModelRequest], ModelResponse]
+    ) -> ModelResponse:
         """Intercepts model calls and potentially raises an exception.
         
         Args:
-            model_call: The model call dictionary.
+            request: The ModelRequest object.
             handler: The next handler in the chain.
             
         Returns:
-            The result of the handler if no exception is raised.
+            The ModelResponse if no exception is raised.
             
         Raises:
             Exception: A random exception from `exception_types` if chaos is triggered.
         """
         # Safety Check
         if os.environ.get(self.safety_key, "").lower() != "true":
-            return handler(model_call)
+            return handler(request)
 
         # Roll Dice
         if random.random() <= self.failure_rate:
@@ -116,7 +141,7 @@ class ChaosMiddleware(AgentMiddleware):
             else:
                 raise Exception("Chaos Monkey triggered on model call!")
 
-        return handler(model_call)
+        return handler(request)
 
 # Custom Exceptions for Chaos
 class RateLimitError(Exception):
