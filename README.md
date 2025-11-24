@@ -1,6 +1,7 @@
-# LangChain Chaos Middleware
+# LangChain Chaos Middleware ( Chaos Monkey )
 
 A middleware for LangChain agents that intentionally injects failures (exceptions) into tool and model calls to test agent resilience.
+
 
 ## Features
 
