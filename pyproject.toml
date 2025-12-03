@@ -1,9 +1,9 @@
 [project]
 name = "langchain-chaos-middleware"
-version = "0.1.1"
+version = "0.1.4"
 description = "Chaos testing middleware for LangChain agents"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "langchain>=1.0.0",
     "langgraph>=1.0.0",

@@ -2,6 +2,22 @@
 
 A middleware for LangChain agents that intentionally injects failures (exceptions) into tool and model calls to test agent resilience.
 
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Basic Example](#basic-example)
+- [Configuration](#configuration)
+- [Default Exception Profiles](#default-exception-profiles)
+- [Custom Exception Profiles](#custom-exception-profiles)
+- [Understanding Failure Rates](#understanding-failure-rates)
+- [Important Note for Production](#important-note-for-production)
+- [For Developers](#for-developers)
+  - [Setting Up the Development Environment](#setting-up-the-development-environment)
+  - [Running Tests](#running-tests)
+  - [Test Coverage](#test-coverage)
+  - [Contributing](#contributing)
 
 ## Features
 
@@ -100,3 +116,67 @@ This means that even with a "low" 20% failure rate, an agent that needs to call 
 ## Important Note for Production
 
 To prevent accidental chaos in production, the middleware checks for an environment variable (default: `ENABLE_CHAOS`). If this variable is not set to `"true"`, the middleware acts as a pass-through and does nothing.
+
+## For Developers
+
+### Setting Up the Development Environment
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/iroy2000/langchain-chaos-middleware.git
+   cd langchain-chaos-middleware
+   ```
+
+2. **Create a virtual environment**:
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
+
+3. **Install dependencies**:
+   ```bash
+   # Install the package dependencies
+   .venv/bin/pip install langchain langgraph
+   
+   # Install test dependencies
+   .venv/bin/pip install python-dotenv langchain-openai
+   ```
+
+### Running Tests
+
+The project includes unit tests to verify the middleware functionality.
+
+**Run all tests**:
+```bash
+.venv/bin/python -m unittest discover tests
+```
+
+**Run only unit tests**:
+```bash
+.venv/bin/python -m unittest tests.test_unit
+```
+
+**Run integration tests** (requires OpenAI API key):
+```bash
+# Create a .env file with your OpenAI API key
+echo "OPENAI_API_KEY=your-key-here" > .env
+
+# Run the integration test
+.venv/bin/python tests/test_integration.py
+```
+
+### Test Coverage
+
+The test suite includes:
+- **Safety mechanism tests**: Verifies chaos is disabled without the safety key
+- **Failure injection tests**: Confirms failures are injected at the configured rate
+- **Tool filtering tests**: Validates include/exclude tool lists work correctly
+- **Model call tests**: Ensures chaos applies to model calls as well
+
+### Contributing
+
+Contributions are welcome! Please ensure all tests pass before submitting a pull request:
+
+```bash
+.venv/bin/python -m unittest discover tests
+```
