@@ -16,7 +16,6 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Testing",
-    "Topic :: Software Development :: Chaos Testing",
     "Topic :: Software Development :: Quality Assurance",
 ]
 dependencies = [
